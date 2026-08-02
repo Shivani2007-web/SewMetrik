@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="85.6mm" height="53.98mm" viewBox="0 0 856 539.8" role="img" aria-label="SewMetrik camera calibration card">
+  <rect x="0" y="0" width="856" height="539.8" fill="#ffffff"/>
+
+  <!-- Outer border defines the physical calibration rectangle. -->
+  <rect x="8" y="8" width="840" height="523.8" fill="none" stroke="#000000" stroke-width="16"/>
+
+  <!-- High-contrast internal pattern for robust detection. -->
+  <g fill="none" stroke="#000000" stroke-width="6">
+    <rect x="54" y="54" width="748" height="431.8"/>
+    <line x1="54" y1="54" x2="802" y2="485.8"/>
+    <line x1="802" y1="54" x2="54" y2="485.8"/>
+    <line x1="428" y1="54" x2="428" y2="485.8"/>
+    <line x1="54" y1="269.9" x2="802" y2="269.9"/>
+  </g>
+
+  <g fill="#000000">
+    <circle cx="130" cy="120" r="20"/>
+    <circle cx="726" cy="120" r="20"/>
+    <circle cx="130" cy="419.8" r="20"/>
+    <circle cx="726" cy="419.8" r="20"/>
+  </g>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#000000" text-anchor="middle">
+    <text x="428" y="166" font-size="62" font-weight="700">SewMetrik</text>
+    <text x="428" y="230" font-size="42" font-weight="700">CAMERA CALIBRATION</text>
+    <text x="428" y="300" font-size="30" font-weight="700">PRINT AT 100% SCALE</text>
+    <text x="428" y="352" font-size="28" font-weight="600">85.6 mm × 53.98 mm</text>
+  </g>
+</svg>

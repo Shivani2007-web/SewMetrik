@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="-104.85 -20.00 209.70 268.60"
+     width="209.70" height="268.60">
+  <!-- White CAD-style background -->
+  <rect x="-104.85" y="-20.00" width="209.70" height="268.60"
+        fill="#ffffff" />
+
+  <!-- Title -->
+  <text x="-94.85" y="-2.00" font-family="sans-serif"
+        font-size="10" font-weight="bold" fill="#1a1a1a">SewMetrik — Sleeve Prototype</text>
+
+  <!-- Continuous bodice outline -->
+  <g fill="none" stroke="#1a1a1a" stroke-width="1.5"
+     stroke-linejoin="round" stroke-linecap="round">
+    <path d="M -84.85 91.44 C -84.85 41.15 -38.18 0.00 0.00 0.00 C 38.18 0.00 84.85 41.15 84.85 91.44 L 72.12 228.60 L -72.12 228.60 L -84.85 91.44 Z" />
+  </g>
+
+  <!-- Construction points -->
+  <g>
+    <circle cx="-84.85" cy="91.44" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="0.00" cy="0.00" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="84.85" cy="91.44" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="72.12" cy="228.60" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="-72.12" cy="228.60" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="-38.18" cy="0.00" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="38.18" cy="0.00" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+  </g>
+
+  <!-- Panel label -->
+  <text x="0.00" y="114.30" font-family="sans-serif"
+        font-size="9" fill="#7f8c8d" text-anchor="middle">SLEEVE</text>
+
+  <!-- Note -->
+  <text x="-94.85" y="242.60" font-family="sans-serif"
+        font-size="8" fill="#7f8c8d">Dimensions in cm</text>
+</svg>
