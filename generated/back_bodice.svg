@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="-20.00 -20.00 288.60 421.00"
+     width="288.60" height="421.00">
+  <!-- White CAD-style background -->
+  <rect x="-20.00" y="-20.00" width="288.60" height="421.00"
+        fill="#ffffff" />
+
+  <!-- Title -->
+  <text x="-10.00" y="-2.00" font-family="sans-serif"
+        font-size="10" font-weight="bold" fill="#1a1a1a">SewMetrik — Back Bodice Prototype</text>
+
+  <!-- Continuous bodice outline -->
+  <g fill="none" stroke="#1a1a1a" stroke-width="1.5"
+     stroke-linejoin="round" stroke-linecap="round">
+    <path d="M 0.00 0.00 C 9.33 16.50 34.23 30.00 62.23 30.00 L 177.80 40.00 C 223.82 55.43 248.60 152.91 248.60 203.20 L 210.50 381.00 L 0.00 381.00 L 0.00 0.00 Z" />
+  </g>
+
+  <!-- Construction points -->
+  <g>
+    <circle cx="0.00" cy="0.00" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="62.23" cy="30.00" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="177.80" cy="40.00" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="248.60" cy="203.20" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="210.50" cy="381.00" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+    <circle cx="0.00" cy="381.00" r="3" fill="#c0392b" stroke="#ffffff" stroke-width="0.8" />
+  </g>
+
+  <!-- Panel label -->
+  <text x="124.30" y="190.50" font-family="sans-serif"
+        font-size="9" fill="#7f8c8d" text-anchor="middle">BACK BODICE</text>
+
+  <!-- Note -->
+  <text x="-10.00" y="395.00" font-family="sans-serif"
+        font-size="8" fill="#7f8c8d">Dimensions in cm</text>
+</svg>

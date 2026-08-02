@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SewMetrik — AI-Assisted Custom Pattern Drafting</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <h1>SewMetrik</h1>
+      <p class="tagline">AI-Assisted Custom Pattern Drafting</p>
+    </div>
+    <div class="header-right">
+      <span class="badge">Prototype v1</span>
+      <span id="engineStatus" class="status status--unknown">
+        Pattern Engine: Checking…
+      </span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- Left column: controls -->
+    <section class="panel">
+      <h2 class="panel-title">Garment</h2>
+      <div class="garment-list" id="garmentList">
+        <button class="garment garment--active" data-garment="saree_blouse">
+          <span class="garment-name">Saree Blouse</span>
+          <span class="tag tag--available">Available</span>
+        </button>
+        <button class="garment garment--disabled" disabled>
+          <span class="garment-name">Kurti</span>
+          <span class="tag tag--soon">Coming Soon</span>
+        </button>
+        <button class="garment garment--disabled" disabled>
+          <span class="garment-name">Palazzo</span>
+          <span class="tag tag--soon">Coming Soon</span>
+        </button>
+      </div>
+
+      <h2 class="panel-title">AI Body Measurement</h2>
+      <p class="section-sub">
+        Use camera-assisted body landmark detection to estimate measurements.
+      </p>
+      <div class="camera-controls">
+        <button id="startCameraBtn" class="btn btn--primary">Start Camera</button>
+        <button id="stopCameraBtn" class="btn btn--accent" disabled>Stop Camera</button>
+      </div>
+      <div id="cameraStage" class="camera-stage">
+        <video id="cameraVideo" playsinline muted></video>
+        <canvas id="poseOverlay" class="pose-overlay"></canvas>
+      </div>
+      <p id="detectionStatus" class="detection-status detection-status--none">
+        No person detected
+      </p>
+      <div class="instructions">
+        <p class="instructions-title">For best results:</p>
+        <ul>
+          <li>Stand facing the camera</li>
+          <li>Keep your upper body visible (head to hips)</li>
+          <li>Keep arms slightly away from your torso</li>
+          <li>Ensure good lighting</li>
+          <li>Keep the camera level</li>
+        </ul>
+      </div>
+
+      <div class="calib-controls">
+        <h3 class="subheading">Camera Calibration</h3>
+        <p class="field-help">
+          Hold the SewMetrik calibration card flat near your upper torso and keep it facing the camera.
+        </p>
+        <p class="field-help">
+          Prototype card width: <strong>8.56 cm</strong>
+        </p>
+        <a
+          class="btn btn--secondary calibration-open-link"
+          href="assets/sewmetrik_calibration_card.svg"
+          target="_blank"
+          rel="noopener"
+        >
+          Open Printable Calibration Card
+        </a>
+        <p class="field-help">Print at 100% / Actual Size. Do not use Fit to Page.</p>
+        <button id="calibrateCameraBtn" class="btn btn--primary" disabled>
+          Calibrate Camera
+        </button>
+        <p class="field-help">
+          For best accuracy, hold the calibration card close to your torso and keep it facing the camera.
+        </p>
+        <div class="calib-status-row">
+          <span id="calibStatus" class="calib-status">Not calibrated</span>
+          <span id="scaleDisplay" class="scale-display">Scale: — px/cm</span>
+        </div>
+        <div class="readiness-card">
+          <p class="instructions-title">Upper Body Scan Readiness</p>
+          <div class="readiness-grid">
+            <div class="ready-item"><span>Head</span><span id="readyHead">✗</span></div>
+            <div class="ready-item"><span>Shoulders</span><span id="readyShoulders">✗</span></div>
+            <div class="ready-item"><span>Arms</span><span id="readyArms">✗</span></div>
+            <div class="ready-item"><span>Waist/Hips</span><span id="readyWaistHips">✗</span></div>
+            <div class="ready-item"><span>Centered</span><span id="readyCentered">✗</span></div>
+          </div>
+        </div>
+        <p id="scanMessage" class="form-message"></p>
+        <p id="calibError" class="form-message form-message--error"></p>
+        <button id="captureMeasurementsBtn" class="btn btn--primary" disabled>
+          Capture Measurements
+        </button>
+      </div>
+
+      <div id="estimateCard" class="estimate-card hidden">
+        <h3 class="subheading">Estimated Measurements</h3>
+        <div id="estimateGrid" class="estimate-grid"></div>
+        <div class="estimate-actions">
+          <button id="applyEstimatesBtn" class="btn btn--accent">
+            Apply to Measurement Form
+          </button>
+          <button id="retakeScanBtn" class="btn btn--secondary">
+            Retake Scan
+          </button>
+        </div>
+        <p class="estimate-note">
+          AI-assisted estimates from a 2D camera scan. Review measurements
+          before pattern generation.
+        </p>
+      </div>
+
+      <h2 class="panel-title">Measurements <span class="unit-hint">(cm)</span></h2>
+      <form id="measurementForm" class="measure-form">
+        <label class="field">
+          <span>Bust</span>
+          <input type="number" step="0.01" min="0.01" name="bust" value="91.44" required />
+        </label>
+        <label class="field">
+          <span>Waist</span>
+          <input type="number" step="0.01" min="0.01" name="waist" value="76.2" required />
+        </label>
+        <label class="field">
+          <span>Shoulder Width</span>
+          <input type="number" step="0.01" min="0.01" name="shoulder_width" value="35.56" required />
+        </label>
+        <label class="field">
+          <span>Blouse Length</span>
+          <input type="number" step="0.01" min="0.01" name="blouse_length" value="38.1" required />
+        </label>
+        <label class="field">
+          <span>Armhole Depth</span>
+          <input type="number" step="0.01" min="0.01" name="armhole_depth" value="20.32" required />
+        </label>
+        <label class="field">
+          <span>Sleeve Length</span>
+          <input type="number" step="0.01" min="0.01" name="sleeve_length" value="22.86" required />
+        </label>
+        <label class="field">
+          <span>Upper Arm Circumference</span>
+          <input type="number" step="0.01" min="0.01" name="upper_arm_circumference" value="27.94" required />
+        </label>
+
+        <button type="submit" id="generateBtn" class="btn btn--primary">
+          Generate Custom Pattern
+        </button>
+        <p id="formMessage" class="form-message" role="status"></p>
+      </form>
+    </section>
+
+    <!-- Right column: results + preview -->
+    <section class="panel panel--wide">
+      <div id="resultCard" class="result-card hidden">
+        <h2 class="result-title">Pattern Generated Successfully</h2>
+        <div class="result-meta">
+          <div><span class="meta-label">Pattern ID</span><span id="metaId" class="meta-value"></span></div>
+          <div><span class="meta-label">Garment Type</span><span id="metaGarment" class="meta-value"></span></div>
+          <div><span class="meta-label">Units</span><span id="metaUnits" class="meta-value"></span></div>
+        </div>
+
+        <h3 class="subheading">Calculated Dimensions</h3>
+        <div id="dimensionsGrid" class="dimensions-grid"></div>
+
+        <a id="downloadDxf" class="btn btn--accent" href="#" download>Download DXF</a>
+      </div>
+
+      <h2 class="panel-title">Pattern Preview</h2>
+      <div id="previewArea" class="preview-area">
+        <p class="preview-placeholder">Your generated pattern will appear here.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script type="module" src="pose.js"></script>
+  <script type="module" src="calibration.js"></script>
+  <script type="module" src="measurements.js"></script>
+</body>
+</html>
