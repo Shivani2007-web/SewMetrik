@@ -294,11 +294,13 @@ async function captureMeasurements() {
   els.captureBtn.disabled = true;
   els.captureBtn.textContent = "Capturing...";
 
+  let framesWithLandmarks = 0;
+
   while (performance.now() - started < sampleDurationMs) {
     const state = getPoseState();
-    const readiness = evaluateReadiness(state);
 
-    if (state.detected && readiness.ready && state.landmarks) {
+    if (state.detected && state.landmarks) {
+      framesWithLandmarks += 1;
       try {
         const estimate = estimateMeasurementsFromLandmarks(
           state.landmarks,
@@ -320,7 +322,13 @@ async function captureMeasurements() {
   els.captureBtn.textContent = "Capture Measurements";
 
   if (samples.length < 4) {
-    els.calibError.textContent = "Move back — keep your complete upper body visible.";
+    if (framesWithLandmarks === 0) {
+      els.calibError.textContent =
+        "No body detected during capture. Stand in view of the camera and try again.";
+    } else {
+      els.calibError.textContent =
+        "Couldn't get a stable reading. Move back so your full upper body (head to hips) is visible, keep arms slightly away, and hold still.";
+    }
     return;
   }
 
@@ -357,11 +365,16 @@ async function captureMeasurements() {
   els.estimateCard.hidden = false;
   els.applyBtn.disabled = false;
 
+  // Auto-apply captured estimates to the measurement form so the values
+  // update immediately. "Apply to Measurement Form" remains available to
+  // re-apply after a retake.
+  applyEstimatesToForm(avg);
+
   els.calibStatus.textContent = "Calibrated";
   els.calibStatus.classList.add("ok");
   els.calibScale.textContent = `Scale: ${avg.pxPerCm.toFixed(2)} px/cm`;
 
-  els.scanStatus.textContent = "Scan complete";
+  els.scanStatus.textContent = "Scan complete — measurements applied to form";
   els.scanStatus.className = "scan-status found";
 }
 

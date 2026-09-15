@@ -82,7 +82,7 @@ function getSampleSize(width, height) {
   };
 }
 
-function buildMask(imageData, threshold = 64) {
+function buildMask(imageData, threshold = 100) {
   const { data, width, height } = imageData;
   const mask = new Uint8Array(width * height);
   for (let i = 0, p = 0; i < data.length; i += 4, p += 1) {
@@ -199,15 +199,20 @@ function edgeSpanAtX(maskObj, x, minY, maxY) {
   return last - first + 1;
 }
 
+// Physical card aspect ratio (85.6 mm / 53.98 mm).
+const CARD_ASPECT = 85.6 / 53.98;
+
 function evaluateComponent(maskObj, comp) {
   const { width: frameW, height: frameH } = maskObj;
   const boxW = comp.maxX - comp.minX + 1;
   const boxH = comp.maxY - comp.minY + 1;
   const boxArea = boxW * boxH;
-  if (boxW < frameW * 0.14 || boxH < frameH * 0.1) return null;
-  if (boxArea < frameW * frameH * 0.025) return null;
 
-  // Reject partial markers clipped by frame boundary.
+  // Must be a reasonably large blob to be the card outline.
+  if (boxW < frameW * 0.12 || boxH < frameH * 0.08) return null;
+  if (boxArea < frameW * frameH * 0.02) return null;
+
+  // Reject partial markers clipped by the frame boundary.
   const edgePad = 2;
   if (
     comp.minX <= edgePad ||
@@ -218,54 +223,54 @@ function evaluateComponent(maskObj, comp) {
     return null;
   }
 
+  // The card is a landscape rectangle (~1.586:1). Allow a generous tolerance
+  // for perspective/tilt but reject clearly wrong shapes.
   const aspect = boxW / boxH;
-  if (aspect < 1.25 || aspect > 1.95) return null;
+  if (aspect < 1.2 || aspect > 2.05) return null;
 
+  // The card has a bold black border plus internal lines/text/dots, so the
+  // component fills a moderate fraction of its bounding box. Very sparse or
+  // fully-solid blobs are not the card.
   const fillRatio = comp.area / boxArea;
-  if (fillRatio < 0.08 || fillRatio > 0.48) return null;
+  if (fillRatio < 0.05 || fillRatio > 0.85) return null;
 
-  const bandX = Math.max(3, Math.round(boxW * 0.12));
-  const bandY = Math.max(3, Math.round(boxH * 0.12));
+  // Confirm a dark border exists along the top and bottom edges (the most
+  // reliable edges for measuring width). Interior content is allowed.
+  const bandX = Math.max(3, Math.round(boxW * 0.1));
+  const bandY = Math.max(3, Math.round(boxH * 0.1));
 
   const top = countDarkInRect(maskObj, comp.minX, comp.minY, comp.maxX + 1, comp.minY + bandY);
   const bottom = countDarkInRect(maskObj, comp.minX, comp.maxY - bandY + 1, comp.maxX + 1, comp.maxY + 1);
   const left = countDarkInRect(maskObj, comp.minX, comp.minY, comp.minX + bandX, comp.maxY + 1);
   const right = countDarkInRect(maskObj, comp.maxX - bandX + 1, comp.minY, comp.maxX + 1, comp.maxY + 1);
 
-  const inner = countDarkInRect(
-    maskObj,
-    comp.minX + bandX,
-    comp.minY + bandY,
-    comp.maxX - bandX + 1,
-    comp.maxY - bandY + 1,
-  );
-
   const topDensity = top.count / Math.max(1, top.area);
   const bottomDensity = bottom.count / Math.max(1, bottom.area);
   const leftDensity = left.count / Math.max(1, left.area);
   const rightDensity = right.count / Math.max(1, right.area);
-  const innerDensity = inner.count / Math.max(1, inner.area);
 
-  if (topDensity < 0.22 || bottomDensity < 0.22 || leftDensity < 0.2 || rightDensity < 0.2) return null;
-  if (innerDensity > 0.11) return null;
+  // Require a visible border on all four edges (the card frame). Thresholds
+  // are lenient so lighting variation doesn't block detection.
+  if (topDensity < 0.12 || bottomDensity < 0.12) return null;
+  if (leftDensity < 0.1 || rightDensity < 0.1) return null;
 
+  // Measure the card width from the dark span at the top and bottom edges.
   const topSpan = edgeSpanAtY(maskObj, comp.minY + bandY * 0.5, comp.minX, comp.maxX);
   const bottomSpan = edgeSpanAtY(maskObj, comp.maxY - bandY * 0.5, comp.minX, comp.maxX);
-  const leftSpan = edgeSpanAtX(maskObj, comp.minX + bandX * 0.5, comp.minY, comp.maxY);
-  const rightSpan = edgeSpanAtX(maskObj, comp.maxX - bandX * 0.5, comp.minY, comp.maxY);
-  if (!topSpan || !bottomSpan || !leftSpan || !rightSpan) return null;
+  if (!topSpan || !bottomSpan) return null;
 
   const widthSkew = Math.max(topSpan, bottomSpan) / Math.max(1, Math.min(topSpan, bottomSpan));
-  const heightSkew = Math.max(leftSpan, rightSpan) / Math.max(1, Math.min(leftSpan, rightSpan));
-  if (widthSkew > 1.3 || heightSkew > 1.3) return null;
+  if (widthSkew > 1.4) return null;
 
-  const confidence =
-    Math.min(1, topDensity + bottomDensity + leftDensity + rightDensity) *
-    Math.max(0.2, 1 - Math.abs(aspect - 1.585) / 0.45) *
-    Math.max(0.2, 1 - innerDensity * 2.5);
+  // Prefer the full bounding-box width, cross-checked against the edge spans.
+  const widthPx = (topSpan + bottomSpan + boxW) / 3;
+
+  const aspectScore = Math.max(0.1, 1 - Math.abs(aspect - CARD_ASPECT) / 0.6);
+  const borderScore = Math.min(1, (topDensity + bottomDensity + leftDensity + rightDensity) / 1.2);
+  const confidence = aspectScore * borderScore;
 
   return {
-    widthPx: (topSpan + bottomSpan) / 2,
+    widthPx,
     confidence,
   };
 }
